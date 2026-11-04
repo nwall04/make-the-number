@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Make the Number · Projector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body class="screen">
+  <main id="stage" class="stage"></main>
+  <footer class="taskbar">
+    <span class="start">START</span>
+    <span id="tb-step" class="tb-item"></span>
+    <span class="spacer"></span>
+    <span id="tb-room" class="tb-item"></span>
+    <span id="tb-status" class="tb-item"></span>
+    <span id="tb-clock" class="tb-item clock"></span>
+  </footer>
+  <aside id="panel" class="panel" hidden></aside>
+  <script type="module" src="js/screen.js"></script>
+</body>
+</html>

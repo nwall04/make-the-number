@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Make the Number</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="landing">
+    <div class="win">
+      <div class="titlebar"><span class="tb-icon"></span><span class="tb-title">MAKE_THE_NUMBER.EXE</span><span class="tb-btns"><i></i><i></i><i></i></span></div>
+      <div class="win-body">
+        <p class="kicker">ADM 4345 · Corporate governance</p>
+        <h1 class="mega" style="font-size:3rem">Make the Number</h1>
+        <p class="body">A live case simulation based on <i>Don Russell: Experiences of a Controller/CFO</i>. Teams make Don’s real decisions and then rebuild ETI’s board.</p>
+        <form id="join" class="ctrl-row"><input id="code" maxlength="4" placeholder="Room code" autocapitalize="characters" autocomplete="off" aria-label="Room code"><button class="btn primary" type="submit">Join as a team</button></form>
+        <div class="landing-grid">
+          <a class="btn" href="host.html">Host panel</a>
+          <a class="btn" href="screen.html?offline=1">Offline mode</a>
+          <a class="btn" href="play.html">Phone view</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    document.getElementById('join').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var c = document.getElementById('code').value.toUpperCase().replace(/[^A-Z]/g, '');
+      location.href = 'play.html' + (c ? '?room=' + c : '');
+    });
+  </script>
+</body>
+</html>

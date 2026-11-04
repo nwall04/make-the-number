@@ -7,7 +7,7 @@ let _client = null;
 export async function client() {
   if (_client) return _client;
   if (window.__MTN_FAKE_CLIENT__) return (_client = window.__MTN_FAKE_CLIENT__); // local tests only
-  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm');
+  const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm');
   _client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true } });
   return _client;
 }

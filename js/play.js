@@ -1,5 +1,5 @@
 // Team phone. play.html?room=ABCD
-import { STEPS, ROUNDS, METERS, BOARD, BOARD_ROUND, BOARD_BUDGET, MAX, teamMeters, standings, validBoard } from './content.js';
+import { STEPS, ROUNDS, METERS, BOARD, BOARD_ROUND, BOARD_BUDGET, MAX, CASE_FILE, teamMeters, standings, validBoard } from './content.js';
 import { OnlineStore, client } from './store.js';
 import { isConfigured } from './config.js';
 import { remaining, fmt } from './controls.js';
@@ -8,6 +8,7 @@ import { esc } from './views.js';
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
 let code = (params.get('room') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4);
+const presetName = (params.get('team') || '').slice(0, 24);
 const key = (c) => `mtn-team-${c}`;
 let me = null; let store = null; let boardDraft = null; let boardSaving = false;
 
@@ -35,13 +36,24 @@ function meters(m) {
     <div class="pm"><span>${esc(x.short)}</span><div class="mbar m-${x.key}"><i style="width:${Math.round((m[x.key] / MAX) * 100)}%"></i></div><b>${m[x.key]}</b></div>`).join('')}</div>`;
 }
 
+// ---------- Case file: always one tap away (and always open beside the game on a laptop) ----------
+function buildCaseFile() {
+  const aside = document.getElementById('casefile');
+  aside.innerHTML = `<div class="win"><div class="titlebar"><span class="tb-title">Case file</span><button type="button" class="cf-close" id="cfClose" aria-label="Close case file">Close</button></div>
+    <div class="win-body">${CASE_FILE.map((sec, i) => `<details ${i < 2 ? 'open' : ''}><summary>${esc(sec.title)}</summary><ul>${sec.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></details>`).join('')}</div></div>`;
+  const btn = document.getElementById('cfBtn');
+  btn.addEventListener('click', () => { document.body.classList.add('cf-open'); });
+  aside.querySelector('#cfClose').addEventListener('click', () => document.body.classList.remove('cf-open'));
+}
+buildCaseFile();
+
 function showJoin(msg = '') {
   app.innerHTML = win('Join your team', `
     <h1 class="pixel">Make the Number</h1>
     <p class="body">One phone per team. Pick a name your classmates will recognize.</p>
     <form id="join" class="join">
       <label class="field">Room code<input id="code" value="${esc(code)}" maxlength="4" autocapitalize="characters" autocomplete="off" required></label>
-      <label class="field">Team name<input id="name" maxlength="24" autocomplete="off" required></label>
+      <label class="field">Team name<input id="name" maxlength="24" autocomplete="off" required value="${esc(presetName)}"></label>
       <button class="btn primary big" type="submit">Join</button>
       ${msg ? `<p class="err">${esc(msg)}</p>` : ''}
     </form>`);
@@ -96,7 +108,7 @@ const P = {
       <h2 class="ptitle">${ch ? `You chose <span class="letter inline">${ch.id}</span> ${esc(ch.label)}` : 'Your team did not answer'}</h2>
       ${showFx && ch ? `<div class="pdeltas">${METERS.map((m) => { const v = ch.effects[m.key]; return `<span class="m-${m.key}">${esc(m.short)} <b class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : ''}${v}</b></span>`; }).join('')}</div>` : '<p class="body">Watch the screen.</p>'}
       ${showFx ? meters(teamMeters(myAnswers(snap), r)) : ''}
-      ${snap.state.kind === 'standings' ? rankLine(snap, r, 'short') : ''}`);
+      ${snap.state.kind === 'standings' ? rankLine(snap, r, 'short') + '<p class="hint">This ranking counts earnings and bonus only. The simulation tracks all four meters.</p>' : ''}`);
   },
   unravel() {
     return win('Trading halted', `<h1 class="pixel alert-text">The scheme unravels</h1><p class="body">Scores are about to be recalculated on what actually mattered. Watch the screen.</p>`);
@@ -108,6 +120,7 @@ const P = {
     const left = remaining(snap.state); const closed = left === 0;
     return win('Round 6 · Boardroom', `
       <div class="phead"><span class="kicker">You are ETI’s new board</span><span class="ptimer" data-timer>${left === null ? '' : closed ? 'Time' : fmt(left)}</span></div>
+      <details class="pfails" open><summary>The six failures to fix</summary><ol>${BOARD.failures.map((f) => `<li>${esc(f.text)}</li>`).join('')}</ol></details>
       <div class="budget"><span>Budget</span><div class="mbar m-info"><i style="width:${(spent / BOARD_BUDGET) * 100}%"></i></div><b>${BOARD_BUDGET - spent} left</b></div>
       <div class="pfixes">${BOARD.fixes.map((f) => {
         const on = boardDraft.includes(f.id); const cant = !on && spent + f.cost > BOARD_BUDGET;
@@ -125,7 +138,10 @@ const P = {
     return win('Final standings', `<p class="kicker">Final</p>${rankLine(snap, ROUNDS.length - 1, 'final')}${meters(teamMeters(myAnswers(snap), ROUNDS.length - 1))}`);
   },
   quote() {
-    return win('Thanks for playing', `<h1 class="pixel">Thanks for playing</h1><p class="body">Team ${esc(me.name)}. You can put the phone away.</p>`);
+    return win('In his own words', `<p class="kicker">Don Russell</p><p class="body">Watch the screen.</p>`);
+  },
+  summary(snap) {
+    return win('End of simulation', `<h1 class="pixel">Thanks for playing</h1>${rankLine(snap, ROUNDS.length - 1, 'final')}${meters(teamMeters(myAnswers(snap), ROUNDS.length - 1))}<p class="body">Team ${esc(me.name)}. You can put the phone away.</p>`);
   },
 };
 
@@ -145,7 +161,7 @@ function render(snap) {
   }
   const kind = snap.state.kind || STEPS[snap.state.step ?? 0]?.kind;
   if (kind !== 'board') boardDraft = null;
-  const k = JSON.stringify([snap.state, snap.teams.length, myAnswers(snap), kind === 'standings' || kind === 'final' ? snap.answers : 0, boardDraft, boardSaving]);
+  const k = JSON.stringify([snap.state, snap.teams.length, myAnswers(snap), kind === 'standings' || kind === 'final' || kind === 'summary' ? snap.answers : 0, boardDraft, boardSaving]);
   if (k === lastKey) return; lastKey = k;
   let html;
   if (kind === 'question') html = P.question(snap);
@@ -201,5 +217,6 @@ async function startGame() {
 if (!isConfigured()) app.innerHTML = win('Setup needed', '<p class="body">The game is not connected to its database yet.</p>');
 else {
   try { me = JSON.parse(localStorage.getItem(key(code)) || 'null'); } catch { me = null; }
-  if (me && code) startGame(); else showJoin();
+  if (me && code) startGame();
+  else { showJoin(); if (presetName && code) app.querySelector('#join').requestSubmit(); }
 }

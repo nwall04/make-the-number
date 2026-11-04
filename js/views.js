@@ -1,6 +1,6 @@
 // Projector views. Each returns an HTML string for one step.
 import {
-  STEPS, ROUNDS, METERS, INTRO, UNRAVEL, BOARD, BOARD_ROUND, BOARD_BUDGET, CLOSING_QUOTE, MAX,
+  STEPS, ROUNDS, METERS, INTRO, UNRAVEL, BOARD, BOARD_ROUND, BOARD_BUDGET, CLOSING_QUOTE, MAX, TAKEAWAYS,
   standings, tally, boardCatches, validBoard,
 } from './content.js';
 import { remaining, fmt } from './controls.js';
@@ -148,7 +148,7 @@ const V = {
     <section class="standings">
       <p class="kicker">After round ${r + 1}</p>
       <h1 class="big">What the company rewards</h1>
-      <p class="sub">Ranked on reported earnings plus your bonus.</p>
+      <p class="sub">Ranked on reported earnings plus your bonus, the way C&amp;S paid its managers. Information quality and legal risk are not counted here. <b>Yet.</b></p>
       ${board(rows, 'short')}
     </section>`;
   },
@@ -172,8 +172,11 @@ const V = {
       <header class="qhead"><div class="tag"><span>ETI</span><span>The new board</span><span>Round 6 of 6</span></div>${timer(snap.state)}</header>
       <h1 class="big">${esc(BOARD.title)}</h1>
       <p class="setup">${esc(BOARD.setup)}</p>
-      <div class="fixes">${BOARD.fixes.map((f) => `<div class="fix"><b>${esc(f.label)}</b><span class="cost">${f.cost}</span></div>`).join('')}</div>
-      <p class="sub">Budget: ${BOARD_BUDGET} points. Choose on your phone.</p>
+      <div class="board-grid">
+        <div class="fail-list"><h3>The six failures to fix</h3><ol>${BOARD.failures.map((f) => `<li>${esc(f.text)}</li>`).join('')}</ol></div>
+        <div><h3>Your toolkit \u00b7 ${BOARD_BUDGET} points</h3><div class="fixes">${BOARD.fixes.map((f) => `<div class="fix"><b>${esc(f.label)}</b><span class="cost">${f.cost}</span></div>`).join('')}</div></div>
+      </div>
+      <p class="sub">Each failure counts as fixed if your board bought at least one fix that addresses it. Choose on your phone.</p>
       ${answeredStrip(snap, BOARD_ROUND)}
     </section>`;
   },
@@ -212,6 +215,33 @@ const V = {
     </section>`;
   },
 
+  summary(snap) {
+    const rows = standings(snap.teams, snap.answers, ROUNDS.length - 1, 'final');
+    const n = snap.teams.length || 1;
+    const decided = ROUNDS.map((R, i) => {
+      const t = tally(snap.teams, snap.answers, i);
+      const top = R.choices.slice().sort((a, b) => t[b.id].length - t[a.id].length)[0];
+      return { R, i, matchDon: Math.round((t[R.don.choice].length / n) * 100), top, topN: t[top.id].length };
+    });
+    const fixCounts = BOARD.fixes.map((f) => ({ f, c: snap.teams.filter((tm) => validBoard(snap.answers[tm.id]?.[BOARD_ROUND]).includes(f.id)).length })).sort((a, b) => b.c - a.c);
+    const podium = rows.slice(0, 3);
+    return `
+    <section class="summary">
+      <p class="kicker">Simulation summary</p>
+      <h1 class="big">Final podium</h1>
+      <div class="podium">${[1, 0, 2].filter((k) => podium[k]).map((k) => `
+        <div class="pod p${k + 1}"><span class="pod-rank">${k + 1}</span><b>${esc(podium[k].name)}</b><span class="pod-score">${podium[k].score}</span><small>Board ${podium[k].catches}/6</small></div>`).join('') || '<p class="muted">No teams played.</p>'}
+      </div>
+      <div class="sum-grid">
+        <div><h3>How the class decided</h3><table class="fx"><tbody>${decided.map((d) => `
+          <tr><td><b>R${d.i + 1} ${esc(d.R.title)}</b></td><td>${d.topN ? `Most picked: <span class="letter inline">${d.top.id}</span> ${esc(d.top.label)}` : '<span class="muted">No votes</span>'}</td><td class="n">${d.matchDon}%</td></tr>`).join('')}
+          </tbody></table><p class="note">Right column: share of teams that made the same choice as Don.</p></div>
+        <div><h3>Three takeaways</h3><ol class="takeaways">${TAKEAWAYS.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
+          ${fixCounts[0] && fixCounts[0].c ? `<p class="note">Most popular governance fix: <b>${esc(fixCounts[0].f.label)}</b></p>` : ''}</div>
+      </div>
+    </section>`;
+  },
+
   quote() {
     return `
     <section class="quote">
@@ -246,7 +276,8 @@ const TITLES = {
   board: () => 'Round 6 · The boardroom',
   boardfail: () => 'Audit log',
   final: () => 'Final standings',
-  quote: () => 'End of simulation',
+  quote: () => 'In his own words',
+  summary: () => 'End of simulation',
 };
 
 export function renderScreen(snap) {

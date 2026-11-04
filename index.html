@@ -2,35 +2,83 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d5c3a">
 <title>Make the Number</title>
+<meta name="description" content="A live case simulation of Don Russell: Experiences of a Controller/CFO. ADM 4345, University of Ottawa.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-  <main class="landing">
-    <div class="win">
-      <div class="titlebar"><span class="tb-icon"></span><span class="tb-title">Make the Number</span><span class="tb-btns"><i></i><i></i><i></i></span></div>
-      <div class="win-body">
-        <p class="kicker">ADM 4345 · Corporate governance</p>
-        <h1 class="mega">Make the Number</h1>
-        <p class="body">A live case simulation based on <i>Don Russell: Experiences of a Controller/CFO</i>. Teams make Don’s real decisions and then rebuild ETI’s board.</p>
-        <form id="join" class="ctrl-row"><input id="code" maxlength="4" placeholder="Room code" autocapitalize="characters" autocomplete="off" aria-label="Room code"><button class="btn primary" type="submit">Join as a team</button></form>
-        <div class="landing-grid">
-          <a class="btn" href="host.html">Host panel</a>
-          <a class="btn" href="screen.html?offline=1">Offline mode</a>
-          <a class="btn" href="play.html">Phone view</a>
-        </div>
+<body class="land">
+  <header class="land-top">
+    <span class="land-logo">Make the Number</span>
+    <span class="land-course">ADM 4345 · Management Control Systems</span>
+  </header>
+
+  <main class="land-wrap">
+    <section class="land-hero">
+      <div class="land-copy">
+        <p class="kicker">Live case simulation · Don Russell: Experiences of a Controller/CFO</p>
+        <h1 class="mega">Make the<br>Number</h1>
+        <p class="land-lede">It is 1985. You are Don Russell, a rising controller with a bonus on the line and earnings to deliver. Your team makes his real decisions, then takes over a broken board.</p>
       </div>
-    </div>
+
+      <form id="join" class="win join-card">
+        <div class="titlebar"><span class="tb-title">Join your team</span></div>
+        <div class="win-body">
+          <label class="field">Room code<input id="code" maxlength="4" placeholder="ABCD" autocapitalize="characters" autocomplete="off" required></label>
+          <label class="field">Team name<input id="team" maxlength="24" placeholder="Pick something your classmates will recognize" autocomplete="off"></label>
+          <button class="btn primary big" type="submit">Join the game</button>
+          <p class="muted small-note">The room code appears on the big screen when class starts. One device per team. A laptop works best, but a phone is fine.</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="land-block">
+      <h2 class="land-h">How it works</h2>
+      <ol class="land-steps">
+        <li><span class="n">1</span><div><h3>Form a team</h3><p>Group up and join on one device with the room code from the screen.</p></div></li>
+        <li><span class="n">2</span><div><h3>Make Don’s calls</h3><p>Five decisions from the case, from Cook &amp; Spector in 1985 to ETI in 1991. You get 90 seconds each to argue and vote.</p></div></li>
+        <li><span class="n">3</span><div><h3>Fix the board</h3><p>Spend 100 governance points to correct the failures that let ETI’s numbers go wrong.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="land-block">
+      <h2 class="land-h">What you are scored on</h2>
+      <div class="legend land-legend">
+        <div class="legend-item m-earn"><i></i><b>Reported earnings</b><small>What the market and your boss see</small></div>
+        <div class="legend-item m-bonus"><i></i><b>Bonus and career</b><small>Money, recognition, promotion</small></div>
+        <div class="legend-item m-info"><i></i><b>Information quality</b><small>Whether anyone can still trust the numbers</small></div>
+        <div class="legend-item m-legal"><i></i><b>Legal exposure</b><small>Your personal risk if it all comes out. Lower is better</small></div>
+      </div>
+      <p class="muted">Think about which of these actually matters.</p>
+    </section>
+
+    <section class="land-block">
+      <h2 class="land-h">Case file</h2>
+      <p class="muted">The key facts are always available inside the game. Skim them now if you want a head start.</p>
+      <div id="landCase" class="land-case"></div>
+    </section>
   </main>
-  <script>
-    document.getElementById('join').addEventListener('submit', function (e) {
+
+  <footer class="land-foot">
+    <span>Built by Noah Wall’s group for ADM 4345.</span>
+    <span><a href="host.html">Host</a> · <a href="screen.html?offline=1">Offline mode</a></span>
+  </footer>
+
+  <script type="module">
+    import { CASE_FILE } from './js/content.js';
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    document.getElementById('landCase').innerHTML = CASE_FILE.map((sec) => `<details><summary>${esc(sec.title)}</summary><ul>${sec.items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul></details>`).join('');
+    const params = new URLSearchParams(location.search);
+    if (params.get('room')) document.getElementById('code').value = params.get('room').toUpperCase();
+    document.getElementById('join').addEventListener('submit', (e) => {
       e.preventDefault();
-      var c = document.getElementById('code').value.toUpperCase().replace(/[^A-Z]/g, '');
-      location.href = 'play.html' + (c ? '?room=' + c : '');
+      const c = document.getElementById('code').value.toUpperCase().replace(/[^A-Z]/g, '');
+      const t = document.getElementById('team').value.trim();
+      location.href = `play.html?room=${encodeURIComponent(c)}${t ? `&team=${encodeURIComponent(t)}` : ''}`;
     });
   </script>
 </body>

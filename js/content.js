@@ -24,7 +24,7 @@ export const INTRO = {
     'Cook & Spector, a $4 billion consumer products division of Queen’s Industries, offers you the corporate controller job: 250 people and “carte blanche.”',
     'Your team will make Don’s real decisions. Four meters track the consequences.',
   ],
-  rewarded: 'The company ranks you on reported earnings and your bonus. Good luck.',
+  rewarded: 'The company ranks you on reported earnings and your bonus. The simulation tracks all four meters.',
 };
 
 export const ROUNDS = [
@@ -154,7 +154,7 @@ export const UNRAVEL = {
 
 export const BOARD = {
   title: 'You are ETI’s new board',
-  setup: 'The shareholders have replaced the board. You have 100 governance points. Pick the fixes that would have stopped ETI.',
+  setup: 'After the scandal, shareholders replaced ETI\u2019s board with you. Your job is to fix the six failures from the case that let the numbers go wrong. You have 100 points, and not every fix fits.',
   fixes: [
     { id: 'indep', label: 'Independent majority on the board', cost: 25 },
     { id: 'chair', label: 'Separate the chair and CEO roles', cost: 10 },
@@ -181,6 +181,57 @@ export const CLOSING_QUOTE = {
   who: 'Don Russell',
 };
 
+export const TAKEAWAYS = [
+  'Earnings management wins in the short run and destroys the information the whole management control system depends on.',
+  'Governance only works when the board, the audit committee and the auditors are independent, competent and willing to challenge management.',
+  'A CPA’s duty runs to the public: never be associated with numbers you know are misleading (CPA Ontario Code, Rule 205).',
+];
+
+// Reference sheet teams can open on their phones at any time.
+export const CASE_FILE = [
+  { title: 'People', items: [
+    'Don Russell: CPA. Senior manager at Touche & Young, evening MBA. Corporate controller at Cook & Spector 1985–1989 (VP and Controller from 1986). CFO of ETI from December 1989.',
+    'Joe Blevins: ETI president. Former Touche & Young audit partner with an explosive personality.',
+    'ETI chairman: strongly opposed to any correcting entry.',
+    'ETI board: the chairman, the president, the previous CFO and the chairman’s friend. Don: it provided “no control.”',
+    'Queen’s Industries: British parent that acquired Cook & Spector in 1984.',
+    'NTC (National Telephone Corporation): offered to buy new ETI shares at a premium and make ETI a partner in satellite telephones.',
+  ] },
+  { title: 'Cook & Spector, 1985–1989', items: [
+    '$4 billion consumer products division of Queen’s, with 60 divisions and over 600 product lines.',
+    '33 consecutive years of rising quarterly earnings.',
+    '1985: profit ran $45M ahead of a $200M plan. Don set up reserves, including $53M for taxes, spread across 600 product lines.',
+    'Don cut the controller’s staff from 250 to 110, saving over $4M a year.',
+    '1986 and 1988: management wanted 8% earnings growth each year. Reserves were released to deliver it.',
+    'Division bonuses: 70% to 100% of base salary, tied to operating profit. Roughly $40M of reserves sat ready against a $200M target.',
+    'Don’s pay: about $130,000 salary and $230,000 in total.',
+    'Don proposed cash-flow and shareholder-value measures. Top management refused, and he left in 1989.',
+  ] },
+  { title: 'Eastern Technologies (ETI), 1989–1991', items: [
+    'Public communications company in Stamford, Connecticut. IPO in 1984 at $11. FY1988 revenue $30M, profit just over $1M.',
+    '1989 revenue $81M, almost three times 1988, but profit just under $1M.',
+    'Debt to equity of 6 to 1 after a $25M high-yield bond.',
+    'Aggressive accounting: virtually all repairs capitalized; $3.5M of interest capitalized; 12-year depreciation on equipment that lasts about 5 years; travel and other costs pushed into goodwill (40 years); a $0.5M gain booked as profit.',
+    'Of $10M in FY1990 capital additions, $3.5M was interest and $2M should have been expensed.',
+    'Auditors gave an unqualified opinion while telling the board the statements were “pushing the edge on aggressive reporting.”',
+    'FY1991 budget: a $2M loss. By January 1991 the forecast was a $4M loss.',
+  ] },
+  { title: 'Don’s position, February 1991', items: [
+    'He believes the problem is at least $5.5M.',
+    'A correction would breach debt covenants, put the NTC deal at risk and likely cost him his job.',
+    'His stock options are worth several hundred thousand dollars, and half can be exercised in two months.',
+    'He has six children and pays $60,000 a year in alimony.',
+    'The quarterly report is due to the SEC on the 15th.',
+  ] },
+  { title: 'Key terms', items: [
+    'Earnings management: actions that make performance look better in the short run with no real economic benefit.',
+    'Reserves (“cookie jar”): amounts set aside in good years and released later to smooth earnings.',
+    'Capitalizing: recording a cost as an asset instead of an expense, which raises current profit.',
+    'Debt covenants: conditions in a loan agreement. Breaching them can let lenders demand repayment.',
+    'MD&A: management’s discussion and analysis in the annual report.',
+  ] },
+];
+
 // ---------- Steps: the linear script the host walks through ----------
 export const BOARD_ROUND = ROUNDS.length; // index used for board answers
 
@@ -198,6 +249,7 @@ export function buildSteps() {
   BOARD.failures.forEach((f, i) => s.push({ kind: 'boardfail', idx: i, label: `Board check ${i + 1}: ${f.concept}` }));
   s.push({ kind: 'final', label: 'Final standings (recalculated)' });
   s.push({ kind: 'quote', label: 'Don in his own words' });
+  s.push({ kind: 'summary', label: 'Summary and final podium' });
   return s;
 }
 export const STEPS = buildSteps();

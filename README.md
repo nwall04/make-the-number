@@ -6,9 +6,10 @@ A live classroom simulation of *Don Russell: Experiences of a Controller/CFO* (M
 
 | Page | Who uses it | What it does |
 | --- | --- | --- |
+| `index.html` | Students before class (the link the professor shares) | Explains the game and the meters, shows the case file, and joins a team with the room code |
 | `host.html` | Noah's MacBook | Sign in, create a room, step through the game, extend or lock timers, fix a team's answer by hand |
 | `screen.html?room=ABCD` | Classroom computer on the projector | Read-only big-screen view. Press **F** for fullscreen |
-| `play.html?room=ABCD` | One phone per team | Join with a team name, vote, see the team's meters |
+| `play.html?room=ABCD` | One device per team | Join with a team name, vote, see the team's meters. The case file is a tap away on phones and stays open beside the game on laptops |
 | `screen.html?offline=1` | Classroom computer, if the Wi-Fi fails | Projector and host in one. Teams call out choices, the host taps them in. **H** shows or hides controls, arrow keys move steps |
 
 ## One-time setup (about 20 minutes)

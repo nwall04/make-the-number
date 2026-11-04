@@ -235,18 +235,18 @@ function board(rows, mode, prevRank) {
 }
 
 const TITLES = {
-  lobby: () => 'MAKE_THE_NUMBER.EXE',
-  intro: () => 'BRIEFING.TXT',
-  question: (s) => `DECISION_R${s.round + 1}.SIM`,
-  tally: (s) => `POLL_R${s.round + 1}.DAT`,
-  effects: (s) => `CONSEQUENCES_R${s.round + 1}.XLS`,
-  don: (s) => `CASE_RECORD_R${s.round + 1}.TXT`,
-  standings: () => 'QUARTERLY_RANKINGS.DAT',
-  unravel: () => 'SYSTEM ALERT',
-  board: () => 'BOARDROOM.EXE',
-  boardfail: () => 'AUDIT_LOG.TXT',
-  final: () => 'HIGH_SCORES.DAT',
-  quote: () => 'END_OF_SIMULATION.TXT',
+  lobby: () => 'Make the Number · Lobby',
+  intro: () => 'Briefing',
+  question: (s) => `Round ${s.round + 1} · Decision`,
+  tally: (s) => `Round ${s.round + 1} · The vote`,
+  effects: (s) => `Round ${s.round + 1} · Consequences`,
+  don: (s) => `Round ${s.round + 1} · What Don did`,
+  standings: () => 'Standings',
+  unravel: () => 'Trading halted',
+  board: () => 'Round 6 · The boardroom',
+  boardfail: () => 'Audit log',
+  final: () => 'Final standings',
+  quote: () => 'End of simulation',
 };
 
 export function renderScreen(snap) {

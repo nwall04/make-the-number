@@ -16,7 +16,7 @@ function toast(msg) {
 const win = (title, body, cls = '') => `<div class="win ${cls}"><div class="titlebar"><span class="tb-icon"></span><span class="tb-title">${esc(title)}</span><span class="tb-btns"><i></i><i></i><i></i></span></div><div class="win-body">${body}</div></div>`;
 
 function signInView(msg = '') {
-  app.innerHTML = `<div class="host-narrow">${win('HOST_LOGIN.EXE', `
+  app.innerHTML = `<div class="host-narrow">${win('Host login', `
     <h1 class="pixel">Host login</h1>
     <form id="login" class="join">
       <label class="field">Email<input id="email" type="email" autocomplete="username" required></label>
@@ -37,7 +37,7 @@ const randomCode = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWX
 
 async function roomsView() {
   const { data: rooms } = await sb.from('rooms').select('code,created_at,state').eq('host_id', user.id).order('created_at', { ascending: false });
-  app.innerHTML = `<div class="host-narrow">${win('ROOMS.DAT', `
+  app.innerHTML = `<div class="host-narrow">${win('Your rooms', `
     <h1 class="pixel">Your rooms</h1>
     <button class="btn primary big" id="create">Create a new room</button>
     <ul class="room-list">${(rooms || []).map((r) => `<li><button class="btn" data-open="${r.code}">Open ${r.code}</button><span class="muted">${new Date(r.created_at).toLocaleString()} · step ${(r.state?.step ?? 0) + 1}/${STEPS.length}</span><button class="link danger" data-del="${r.code}">Delete</button></li>`).join('') || '<li class="muted">No rooms yet. Create one for the rehearsal and a fresh one for class.</li>'}</ul>
@@ -66,7 +66,7 @@ async function openRoom(code) {
   app.innerHTML = `
   <div class="console">
     <div class="console-main">
-      ${win(`ROOM ${code} · CONTROL`, `
+      ${win(`Room ${code} · Control`, `
         <div class="now"><span class="kicker">Now</span><b id="nowLabel"></b><span id="nowTimer" class="ptimer"></span></div>
         <div class="ctrl-row big-ctrls">
           <button class="btn" data-act="back">◀ Back</button>
@@ -77,16 +77,16 @@ async function openRoom(code) {
         </div>
         <p class="muted" id="nextLabel"></p>
         <div id="notes" class="notes"></div>`)}
-      ${win('ANSWERS.DAT', `<p class="muted" id="answeredCount"></p><div id="entry"></div>`)}
-      ${win('PREVIEW', `<div class="preview"><iframe id="preview" src="${esc(screenUrl)}" title="Projector preview" tabindex="-1"></iframe></div>`)}
+      ${win('Answers', `<p class="muted" id="answeredCount"></p><div id="entry"></div>`)}
+      ${win('Projector preview', `<div class="preview"><iframe id="preview" src="${esc(screenUrl)}" title="Projector preview" tabindex="-1"></iframe></div>`)}
     </div>
     <div class="console-side">
-      ${win('LINKS', `
+      ${win('Links', `
         <label class="field">Projector (open on the class computer)<input readonly value="${esc(screenUrl)}" onclick="this.select()"></label>
         <label class="field">Phones<input readonly value="${esc(playUrl(code))}" onclick="this.select()"></label>
         <p><a class="btn" href="${esc(screenUrl)}" target="_blank" rel="noopener">Open projector view</a> <a class="btn" href="${esc(playUrl(code))}" target="_blank" rel="noopener">Open a test phone</a></p>`)}
-      ${win('STEPS', `<ol class="steps" id="steps">${STEPS.map((s, i) => `<li><button class="link" data-jump="${i}">${esc(s.label)}</button></li>`).join('')}</ol>`)}
-      ${win('TEAMS', `<form id="addTeam" class="ctrl-row"><input id="teamName" maxlength="24" placeholder="Add a team by hand"><button class="btn" type="submit">Add</button></form><div id="teams"></div>
+      ${win('Run of show', `<ol class="steps" id="steps">${STEPS.map((s, i) => `<li><button class="link" data-jump="${i}">${esc(s.label)}</button></li>`).join('')}</ol>`)}
+      ${win('Teams', `<form id="addTeam" class="ctrl-row"><input id="teamName" maxlength="24" placeholder="Add a team by hand"><button class="btn" type="submit">Add</button></form><div id="teams"></div>
         <p><button class="link danger" id="clear">Clear all answers</button> · <button class="link" id="leaveRoom">Back to rooms</button></p>`)}
     </div>
   </div>`;
@@ -145,7 +145,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 (async () => {
-  if (!isConfigured()) { app.innerHTML = `<div class="host-narrow">${win('SETUP NEEDED', '<p class="body">Add your Supabase URL and anon key to <code>js/config.js</code>. Until then you can use <a href="screen.html?offline=1">offline mode</a>.</p>')}</div>`; return; }
+  if (!isConfigured()) { app.innerHTML = `<div class="host-narrow">${win('Setup needed', '<p class="body">Add your Supabase URL and anon key to <code>js/config.js</code>. Until then you can use <a href="screen.html?offline=1">offline mode</a>.</p>')}</div>`; return; }
   sb = await client();
   const { data } = await sb.auth.getSession();
   user = data.session?.user || null;

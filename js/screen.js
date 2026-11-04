@@ -19,20 +19,20 @@ function message(title, body) {
 
 let store;
 if (offline) store = new OfflineStore();
-else if (!isConfigured()) { message('SETUP NEEDED', 'Add the Supabase URL and anon key to <code>js/config.js</code>, or open <code>screen.html?offline=1</code> for the offline version.'); }
-else if (!code) { message('NO ROOM', 'Open this page from the host panel, or add <code>?room=ABCD</code> to the address.'); }
+else if (!isConfigured()) { message('Setup needed', 'Add the Supabase URL and anon key to <code>js/config.js</code>, or open <code>screen.html?offline=1</code> for the offline version.'); }
+else if (!code) { message('No room', 'Open this page from the host panel, or add <code>?room=ABCD</code> to the address.'); }
 else store = new OnlineStore(code);
 
 let lastKey = '';
 function render(snap) {
-  if (!snap.exists && !offline) { message('ROOM NOT FOUND', `Room ${esc(snap.code)} does not exist yet. Create it from the host panel.`); return; }
+  if (!snap.exists && !offline) { message('Room not found', `Room ${esc(snap.code)} does not exist yet. Create it from the host panel.`); return; }
   const key = JSON.stringify([snap.state.step, snap.state.deadline, snap.teams, snap.answers]);
   if (key !== lastKey) { stage.innerHTML = renderScreen(snap); lastKey = key; }
   const s = STEPS[snap.state.step ?? 0];
   document.getElementById('tb-step').textContent = `${(snap.state.step ?? 0) + 1}/${STEPS.length} ${s?.label || ''}`;
-  document.getElementById('tb-room').textContent = offline ? 'OFFLINE MODE' : `ROOM ${snap.code}`;
+  document.getElementById('tb-room').textContent = offline ? 'Offline mode' : `Room ${snap.code}`;
   const st = document.getElementById('tb-status');
-  st.textContent = snap.status === 'live' ? '● LIVE' : snap.status === 'offline' ? '● LOCAL' : '○ ' + snap.status.toUpperCase();
+  st.textContent = snap.status === 'live' ? '● Live' : snap.status === 'offline' ? '● Local' : '○ ' + snap.status;
   st.className = `tb-item status-${snap.status}`;
   if (offline) renderPanel(snap);
 }
@@ -56,7 +56,7 @@ function renderPanel(snap) {
   if (!panel.dataset.built) {
     panel.innerHTML = `
       <div class="win small">
-        <div class="titlebar"><span class="tb-icon"></span><span class="tb-title">HOST_CONTROLS.EXE (H to hide)</span></div>
+        <div class="titlebar"><span class="tb-icon"></span><span class="tb-title">Host controls · press H to hide</span></div>
         <div class="win-body panel-body">
           <div class="ctrl-row">
             <button type="button" class="btn" data-act="back">◀ Back</button>
@@ -114,4 +114,4 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'h' || e.key === 'H') panel.hidden = !panel.hidden;
 });
 
-if (store) store.start().then((s) => s.onChange(render)).catch((err) => message('CONNECTION ERROR', esc(err.message || String(err))));
+if (store) store.start().then((s) => s.onChange(render)).catch((err) => message('Connection error', esc(err.message || String(err))));

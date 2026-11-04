@@ -36,7 +36,7 @@ function meters(m) {
 }
 
 function showJoin(msg = '') {
-  app.innerHTML = win('JOIN_TEAM.EXE', `
+  app.innerHTML = win('Join your team', `
     <h1 class="pixel">Make the Number</h1>
     <p class="body">One phone per team. Pick a name your classmates will recognize.</p>
     <form id="join" class="join">
@@ -73,12 +73,12 @@ function myAnswers(snap) { return snap.answers[me.team_id] || {}; }
 
 const P = {
   waiting(snap) {
-    return win('STANDBY', `<p class="kicker">Team</p><h1 class="pixel">${esc(me.name)}</h1><p class="body">You are in. Watch the big screen.</p>${meters(teamMeters(myAnswers(snap), -1))}`);
+    return win('Standing by', `<p class="kicker">Team</p><h1 class="pixel">${esc(me.name)}</h1><p class="body">You are in. Watch the big screen.</p>${meters(teamMeters(myAnswers(snap), -1))}`);
   },
   question(snap) {
     const r = snap.state.round; const R = ROUNDS[r]; const cur = myAnswers(snap)[r];
     const left = remaining(snap.state); const closed = left === 0;
-    return win(`DECISION_R${r + 1}.SIM`, `
+    return win(`Round ${r + 1} · Decision`, `
       <div class="phead"><span class="kicker">${esc(R.company)} · ${esc(R.year)}</span><span class="ptimer" data-timer>${left === null ? '' : closed ? 'Time' : fmt(left)}</span></div>
       <h2 class="ptitle">${esc(R.prompt)}</h2>
       <div class="pchoices">${R.choices.map((c) => `
@@ -91,7 +91,7 @@ const P = {
     const r = snap.state.round; const R = ROUNDS[r]; const cur = myAnswers(snap)[r];
     const ch = R.choices.find((c) => c.id === cur);
     const showFx = ['effects', 'don', 'standings'].includes(snap.state.kind);
-    return win(`RESULT_R${r + 1}.DAT`, `
+    return win(`Round ${r + 1} · Result`, `
       <p class="kicker">Round ${r + 1}: ${esc(R.title)}</p>
       <h2 class="ptitle">${ch ? `You chose <span class="letter inline">${ch.id}</span> ${esc(ch.label)}` : 'Your team did not answer'}</h2>
       ${showFx && ch ? `<div class="pdeltas">${METERS.map((m) => { const v = ch.effects[m.key]; return `<span class="m-${m.key}">${esc(m.short)} <b class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : ''}${v}</b></span>`; }).join('')}</div>` : '<p class="body">Watch the screen.</p>'}
@@ -99,14 +99,14 @@ const P = {
       ${snap.state.kind === 'standings' ? rankLine(snap, r, 'short') : ''}`);
   },
   unravel() {
-    return win('SYSTEM ALERT', `<h1 class="pixel alert-text">The scheme unravels</h1><p class="body">Scores are about to be recalculated on what actually mattered. Watch the screen.</p>`);
+    return win('Trading halted', `<h1 class="pixel alert-text">The scheme unravels</h1><p class="body">Scores are about to be recalculated on what actually mattered. Watch the screen.</p>`);
   },
   board(snap) {
     const saved = validBoard(myAnswers(snap)[BOARD_ROUND]);
     if (boardDraft === null) boardDraft = saved.slice();
     const spent = boardDraft.reduce((a, id) => a + BOARD.fixes.find((f) => f.id === id).cost, 0);
     const left = remaining(snap.state); const closed = left === 0;
-    return win('BOARDROOM.EXE', `
+    return win('Round 6 · Boardroom', `
       <div class="phead"><span class="kicker">You are ETI’s new board</span><span class="ptimer" data-timer>${left === null ? '' : closed ? 'Time' : fmt(left)}</span></div>
       <div class="budget"><span>Budget</span><div class="mbar m-info"><i style="width:${(spent / BOARD_BUDGET) * 100}%"></i></div><b>${BOARD_BUDGET - spent} left</b></div>
       <div class="pfixes">${BOARD.fixes.map((f) => {
@@ -119,13 +119,13 @@ const P = {
     const i = snap.state.step - STEPS.findIndex((s) => s.kind === 'boardfail');
     const f = BOARD.failures[i]; const picks = validBoard(myAnswers(snap)[BOARD_ROUND]);
     const ok = f.caughtBy.some((id) => picks.includes(id));
-    return win('AUDIT_LOG.TXT', `<p class="kicker">Failure ${i + 1} of ${BOARD.failures.length}</p><h2 class="ptitle">${esc(f.concept)}</h2><p class="verdict ${ok ? 'ok' : 'miss'}">${ok ? 'Your board caught it' : 'Your board missed it'}</p>`);
+    return win('Audit log', `<p class="kicker">Failure ${i + 1} of ${BOARD.failures.length}</p><h2 class="ptitle">${esc(f.concept)}</h2><p class="verdict ${ok ? 'ok' : 'miss'}">${ok ? 'Your board caught it' : 'Your board missed it'}</p>`);
   },
   final(snap) {
-    return win('HIGH_SCORES.DAT', `<p class="kicker">Final</p>${rankLine(snap, ROUNDS.length - 1, 'final')}${meters(teamMeters(myAnswers(snap), ROUNDS.length - 1))}`);
+    return win('Final standings', `<p class="kicker">Final</p>${rankLine(snap, ROUNDS.length - 1, 'final')}${meters(teamMeters(myAnswers(snap), ROUNDS.length - 1))}`);
   },
   quote() {
-    return win('END_OF_SIMULATION.TXT', `<h1 class="pixel">Thanks for playing</h1><p class="body">Team ${esc(me.name)}. You can put the phone away.</p>`);
+    return win('Thanks for playing', `<h1 class="pixel">Thanks for playing</h1><p class="body">Team ${esc(me.name)}. You can put the phone away.</p>`);
   },
 };
 
@@ -138,7 +138,7 @@ function rankLine(snap, r, mode) {
 
 let lastKey = '';
 function render(snap) {
-  if (!snap.exists) { app.innerHTML = win('ROOM CLOSED', '<p class="body">This room no longer exists.</p><button class="btn" id="leave">Join another room</button>'); bindLeave(); return; }
+  if (!snap.exists) { app.innerHTML = win('Room closed', '<p class="body">This room no longer exists.</p><button class="btn" id="leave">Join another room</button>'); bindLeave(); return; }
   if (!snap.teams.some((t) => t.id === me.team_id) && snap.teams.length && snap.status === 'live') {
     try { localStorage.removeItem(key(code)); } catch {}
     me = null; showJoin('Your team was removed by the host. Join again.'); return;
@@ -192,13 +192,13 @@ setInterval(() => {
 }, 500);
 
 async function startGame() {
-  app.innerHTML = win('CONNECTING', '<p class="body">Connecting to the room…</p>');
+  app.innerHTML = win('Connecting', '<p class="body">Connecting to the room…</p>');
   store = new OnlineStore(code);
   await store.start();
   store.onChange(render);
 }
 
-if (!isConfigured()) app.innerHTML = win('SETUP NEEDED', '<p class="body">The game is not connected to its database yet.</p>');
+if (!isConfigured()) app.innerHTML = win('Setup needed', '<p class="body">The game is not connected to its database yet.</p>');
 else {
   try { me = JSON.parse(localStorage.getItem(key(code)) || 'null'); } catch { me = null; }
   if (me && code) startGame(); else showJoin();

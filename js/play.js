@@ -171,7 +171,7 @@ function render(snap) {
   else if (['tally', 'effects', 'don', 'standings'].includes(kind)) html = P.result(snap);
   else if (P[kind]) html = P[kind](snap);
   else html = P.waiting(snap);
-  app.innerHTML = html + `<p class="foot">Team ${esc(me.name)} · Room ${esc(code)} · <button type="button" class="link" id="leave">Leave</button></p>`;
+  app.innerHTML = html + `<p class="foot">${esc(me.name)} · Room ${esc(code)} · <button type="button" class="link" id="leave">Leave</button></p>`;
   bindLeave();
 }
 

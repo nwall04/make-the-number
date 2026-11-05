@@ -411,3 +411,79 @@ body.land { min-height: 100%; }
 .pod.p1 { min-height: 8em; } .pod.p2 { min-height: 6.6em; } .pod.p3 { min-height: 5.6em; }
 .pod-rank { font-size: 1.7em; } .pod-score { font-size: 2em; }
 .summary .fx td { padding: .45em .5em; }
+
+/* ---------- Briefing: Don's career timeline ---------- */
+.lede-sm { font-size: 1.2em; max-width: 60ch; margin: 0 0 1em; }
+.career { list-style: none; padding: 0; margin: 0 0 1.2em; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1em; position: relative; }
+.career::before { content: ""; position: absolute; left: 1em; right: 1em; top: 1.05em; height: 4px; background: var(--line); z-index: 0; }
+.career > li { position: relative; z-index: 1; background: #fff; border: 2px solid var(--line); border-radius: 10px; padding: .9em 1em 1em; display: grid; gap: .25em; align-content: start; }
+.career > li.play { border-color: var(--ink); }
+.career .when { justify-self: start; font: 800 .95em/1 var(--display); letter-spacing: .04em; background: var(--ink); color: var(--amber); padding: .35em .6em; border-radius: 4px; }
+.career > li:not(.play) .when { background: var(--line); color: var(--ink); }
+.career b { font: 800 1.55em/1.05 var(--display); margin-top: .25em; }
+.career .role { font-weight: 700; color: var(--green); }
+.career ul { margin: .3em 0 .2em; padding-left: 1.1em; font-size: .92em; color: var(--ink-2); }
+.career .rounds { justify-self: start; font-weight: 700; font-size: .85em; border: 2px solid var(--green); color: var(--green); padding: .15em .55em; border-radius: 999px; }
+.career .rounds.muted-r { border-color: var(--line); color: var(--muted); }
+.intro .legend { margin: .4em 0 1em; }
+
+/* ---------- Decision: situation, then the ask ---------- */
+.qblock { position: relative; padding: .2em 0 0 1.1em; border-left: 5px solid var(--line); margin-bottom: .7em; }
+.qblock.decision { border-left-color: var(--green); margin-bottom: .6em; }
+.qlabel { display: inline-block; font: 800 .8em/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .35em; }
+.decision .qlabel { color: var(--green); }
+.you { margin: 0 0 .35em; font-size: 1.02em; }
+.you b { font-weight: 700; }
+.question .setup { margin-bottom: .6em; }
+.question blockquote { margin: .5em 0 .2em; }
+.question .prompt { margin: 0; font-size: 1.7em; }
+.question .big { margin-bottom: .25em; }
+
+/* ---------- What Don did: compare with the standard ---------- */
+.don-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2em; align-items: start; }
+.don::after { display: none; }
+.measure { border-radius: 12px; padding: 1.1em 1.2em; border: 3px solid var(--ink); background: #fff; }
+.measure ul { margin: .7em 0; padding-left: 1.1em; display: grid; gap: .5em; font-size: .95em; line-height: 1.4; }
+.verdict-tag { display: inline-block; font: 900 1.6em/1 var(--display); text-transform: uppercase; letter-spacing: .04em; padding: .25em .55em; border-radius: 6px; transform: rotate(-2deg); }
+.v-bad { border-color: var(--red); } .v-bad .verdict-tag { background: var(--red); color: #fff; }
+.v-part { border-color: var(--bonus); } .v-part .verdict-tag { background: var(--amber); color: var(--ink); }
+.v-ok { border-color: var(--earn); } .v-ok .verdict-tag { background: var(--earn); color: #fff; }
+.expected { background: #eef4ef; border-radius: 8px; padding: .6em .8em; margin: 0 0 .6em; }
+.measure .src { font-size: .78em; color: var(--muted); margin: 0; }
+
+/* ---------- Alert: trading halted ---------- */
+.halt { display: flex; align-items: center; gap: .7em; background: var(--red); color: #fff; font: 900 1.5em/1 var(--display); text-transform: uppercase; letter-spacing: .08em; padding: .55em .8em; border-radius: 8px; margin-bottom: .9em; animation: halt-pulse 1.6s ease-in-out infinite; }
+.halt-dot { width: .6em; height: .6em; border-radius: 50%; background: #fff; animation: blink 1s steps(2) infinite; }
+@keyframes halt-pulse { 50% { box-shadow: 0 0 0 .35em rgba(196,48,43,.18); } }
+.unravel-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 1.6em; align-items: start; }
+.unravel-grid .timeline { margin-top: 0; }
+.crash { border: 3px solid var(--red); border-radius: 12px; padding: 1em; background: #fff; display: grid; gap: .2em; }
+.crash-v { font: 900 5em/1 var(--display); color: var(--red); }
+.crash-l { font-weight: 700; color: var(--ink-2); }
+.crash svg { width: 100%; height: auto; margin-top: .4em; }
+.crash polyline { fill: none; stroke: var(--red); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.land-foot { justify-content: flex-end; }
+
+/* ---------- Phone additions ---------- */
+.psit { background: #f3f5f2; border-radius: 8px; padding: 10px 12px; margin: 4px 0 12px; font-size: .95rem; line-height: 1.4; }
+.psit .qlabel { display: block; font-size: .75rem; }
+.phone-app .qlabel { color: var(--green); }
+.pverdict { border-radius: 8px; padding: 10px 12px; margin: 10px 0 0; font-size: .95rem; }
+.pverdict.v-bad { background: #fbe6e4; } .pverdict.v-part { background: #fff3cc; }
+
+@media (max-width: 900px) { .career, .don-grid, .unravel-grid { grid-template-columns: 1fr; } .career::before { display: none; } }
+
+/* Decision: side by side so every round fits one screen */
+.question .qhead { align-items: flex-start; margin-bottom: .6em; }
+.question .qhead .big { margin: .35em 0 0; }
+.qgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 1.6em; align-items: start; }
+.question .setup { font-size: 1.02em; }
+.question .facts span { font-size: 1.1em; }
+.question blockquote { font-size: .92em; }
+.question .prompt { font-size: 1.45em; margin-bottom: .55em; }
+.choices.stack { grid-template-columns: 1fr; gap: .5em; }
+.choices.stack .choice { padding: .6em .8em; }
+.choices.stack .choice b { font-size: 1.15em; }
+.choices.stack .choice p { font-size: .86em; margin-top: .15em; }
+.question .answered { margin-top: .7em; }
+@media (max-width: 900px) { .qgrid { grid-template-columns: 1fr; } }

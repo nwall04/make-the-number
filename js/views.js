@@ -54,7 +54,7 @@ const V = {
         <p class="kicker">ADM 4345 · Corporate governance</p>
         <h1 class="mega">Make the<br>Number</h1>
         <p class="lede">A live case on earnings management, controllers and boards, based on Don Russell: Experiences of a Controller/CFO.</p>
-        <p class="rule">One phone per team. Pick a team name your classmates will recognize.</p>
+        <p class="rule">One phone or computer per team (a computer is easier). Join with your group number.</p>
       </div>
       <div class="lobby-right">
         ${offline ? `<div class="offline-card"><b>Offline mode</b><p>Teams call out their choices and the host enters them.</p></div>` : `
@@ -71,7 +71,11 @@ const V = {
     <section class="intro">
       <p class="kicker">${esc(INTRO.kicker)}</p>
       <h1 class="big">${esc(INTRO.title)}</h1>
-      ${INTRO.body.map((p) => `<p class="body">${esc(p)}</p>`).join('')}
+      <p class="lede-sm">${esc(INTRO.lede)}</p>
+      <ol class="career">${INTRO.career.map((c) => `
+        <li class="${c.rounds ? 'play' : ''}"><span class="when">${esc(c.when)}</span><b>${esc(c.where)}</b><span class="role">${esc(c.role)}</span>
+          <ul>${c.facts.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>${c.rounds ? `<span class="rounds">${esc(c.rounds)}</span>` : '<span class="rounds muted-r">Background</span>'}</li>`).join('')}
+      </ol>
       <div class="legend">${METERS.map((m) => `<div class="legend-item m-${m.key}"><i></i><b>${esc(m.label)}</b><small>${m.good === 'low' ? 'lower is better' : 'higher is better'}</small></div>`).join('')}</div>
       <p class="rewarded">${esc(INTRO.rewarded)}</p>
     </section>`;
@@ -81,14 +85,22 @@ const V = {
     const r = snap.state.round; const R = ROUNDS[r];
     return `
     <section class="question">
-      <header class="qhead">${roundTag(r)}${timer(snap.state)}</header>
-      <h1 class="big">${esc(R.title)}</h1>
-      <p class="setup">${esc(R.setup)}</p>
-      <div class="facts">${R.facts.map((f) => `<span>${esc(f)}</span>`).join('')}</div>
-      ${R.quote ? `<blockquote>${esc(R.quote)}</blockquote>` : ''}
-      <h2 class="prompt">${esc(R.prompt)}</h2>
-      <div class="choices n${R.choices.length}">${R.choices.map((c) => `
-        <div class="choice"><span class="letter">${c.id}</span><div><b>${esc(c.label)}</b><p>${esc(c.detail)}</p></div></div>`).join('')}
+      <header class="qhead"><div>${roundTag(r)}<h1 class="big">${esc(R.title)}</h1></div>${timer(snap.state)}</header>
+      <div class="qgrid">
+        <div class="qblock situation">
+          <span class="qlabel">The situation</span>
+          <p class="you">You are: <b>${esc(R.role)}</b></p>
+          <p class="setup">${esc(R.setup)}</p>
+          <div class="facts">${R.facts.map((f) => `<span>${esc(f)}</span>`).join('')}</div>
+          ${R.quote ? `<blockquote>${esc(R.quote)}</blockquote>` : ''}
+        </div>
+        <div class="qblock decision">
+          <span class="qlabel">Your decision</span>
+          <h2 class="prompt">${esc(R.prompt)}</h2>
+          <div class="choices stack">${R.choices.map((c) => `
+            <div class="choice"><span class="letter">${c.id}</span><div><b>${esc(c.label)}</b><p>${esc(c.detail)}</p></div></div>`).join('')}
+          </div>
+        </div>
       </div>
       ${answeredStrip(snap, r)}
     </section>`;
@@ -134,10 +146,21 @@ const V = {
     return `
     <section class="don">
       <header class="qhead">${roundTag(r)}</header>
-      <p class="kicker">What Don actually did</p>
-      <h1 class="big"><span class="letter inline">${ch.id}</span> ${esc(ch.label)}</h1>
-      <p class="body">${esc(R.don.text)}</p>
-      <blockquote class="pull">“${esc(R.don.quote)}”<cite>Don Russell</cite></blockquote>
+      <div class="don-grid">
+        <div>
+          <p class="kicker">What Don actually did</p>
+          <h1 class="big"><span class="letter inline">${ch.id}</span> ${esc(ch.label)}</h1>
+          <p class="body">${esc(R.don.text)}</p>
+          <blockquote class="pull">“${esc(R.don.quote)}”<cite>Don Russell</cite></blockquote>
+        </div>
+        <aside class="measure v-${R.standard.verdict === 'Meets' ? 'ok' : R.standard.verdict === 'Partly meets' ? 'part' : 'bad'}">
+          <p class="kicker">How it measures up</p>
+          <span class="verdict-tag">${esc(R.standard.verdict)}</span>
+          <ul>${R.standard.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
+          ${(() => { const ex = R.choices.find((c) => c.id === R.standard.expected); return `<p class="expected">Closest to expected conduct: <span class="letter inline">${ex.id}</span> <b>${esc(ex.label)}</b></p>`; })()}
+          <p class="src">Benchmarks: CPA Ontario Code of Professional Conduct; the controller’s role from the textbook.</p>
+        </aside>
+      </div>
     </section>`;
   },
 
@@ -157,9 +180,13 @@ const V = {
     const rows = standings(snap.teams, snap.answers, ROUNDS.length - 1, 'short');
     return `
     <section class="unravel">
+      <div class="halt"><span class="halt-dot"></span>Trading halted · ETI · Auditors resign</div>
       <p class="kicker">${esc(UNRAVEL.kicker)}</p>
-      <h1 class="big">The scheme unravels</h1>
-      <ol class="timeline">${UNRAVEL.events.map((e) => `<li><b>${esc(e.when)}</b><span>${esc(e.text)}</span></li>`).join('')}</ol>
+      <h1 class="big">${esc(UNRAVEL.title)}</h1>
+      <div class="unravel-grid">
+        <ol class="timeline">${UNRAVEL.events.map((e) => `<li><b>${esc(e.when)}</b><span>${esc(e.text)}</span></li>`).join('')}</ol>
+        <div class="crash"><span class="crash-v">${esc(UNRAVEL.stat.value)}</span><span class="crash-l">${esc(UNRAVEL.stat.label)}</span><svg viewBox="0 0 200 80" aria-hidden="true"><polyline points="0,60 30,52 60,44 90,34 120,24 140,18 150,16 160,58 200,66" /></svg></div>
+      </div>
       <p class="line">${esc(UNRAVEL.line)}</p>
       ${rows.length ? `<p class="sub">Current leader on short-term results: <b>${esc(rows[0].name)}</b></p>` : ''}
     </section>`;

@@ -50,10 +50,10 @@ buildCaseFile();
 function showJoin(msg = '') {
   app.innerHTML = win('Join your team', `
     <h1 class="pixel">Make the Number</h1>
-    <p class="body">One phone per team. Pick a name your classmates will recognize.</p>
+    <p class="body">One phone or computer per team (a computer is easier). Use your group number as the team name.</p>
     <form id="join" class="join">
       <label class="field">Room code<input id="code" value="${esc(code)}" maxlength="4" autocapitalize="characters" autocomplete="off" required></label>
-      <label class="field">Team name<input id="name" maxlength="24" autocomplete="off" required value="${esc(presetName)}"></label>
+      <label class="field">Group number<input id="name" placeholder="Group 3" maxlength="24" autocomplete="off" required value="${esc(presetName)}"></label>
       <button class="btn primary big" type="submit">Join</button>
       ${msg ? `<p class="err">${esc(msg)}</p>` : ''}
     </form>`);
@@ -92,6 +92,8 @@ const P = {
     const left = remaining(snap.state); const closed = left === 0;
     return win(`Round ${r + 1} · Decision`, `
       <div class="phead"><span class="kicker">${esc(R.company)} · ${esc(R.year)}</span><span class="ptimer" data-timer>${left === null ? '' : closed ? 'Time' : fmt(left)}</span></div>
+      <p class="psit"><span class="qlabel">The situation</span>${esc(R.brief)} <span class="muted">Full details are on the big screen.</span></p>
+      <span class="qlabel">Your decision</span>
       <h2 class="ptitle">${esc(R.prompt)}</h2>
       <div class="pchoices">${R.choices.map((c) => `
         <button type="button" class="pchoice ${cur === c.id ? 'on' : ''}" data-choice="${c.id}" ${closed ? 'disabled' : ''}>
@@ -107,11 +109,12 @@ const P = {
       <p class="kicker">Round ${r + 1}: ${esc(R.title)}</p>
       <h2 class="ptitle">${ch ? `You chose <span class="letter inline">${ch.id}</span> ${esc(ch.label)}` : 'Your team did not answer'}</h2>
       ${showFx && ch ? `<div class="pdeltas">${METERS.map((m) => { const v = ch.effects[m.key]; return `<span class="m-${m.key}">${esc(m.short)} <b class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : ''}${v}</b></span>`; }).join('')}</div>` : '<p class="body">Watch the screen.</p>'}
+      ${snap.state.kind === 'don' ? `<p class="pverdict v-${R.standard.verdict === 'Partly meets' ? 'part' : 'bad'}">Don\u2019s choice: <b>${esc(R.standard.verdict)}</b> the expected standard. Closest to expected conduct: <b>${R.standard.expected}</b>.</p>` : ''}
       ${showFx ? meters(teamMeters(myAnswers(snap), r)) : ''}
       ${snap.state.kind === 'standings' ? rankLine(snap, r, 'short') + '<p class="hint">This ranking counts earnings and bonus only. The simulation tracks all four meters.</p>' : ''}`);
   },
   unravel() {
-    return win('Trading halted', `<h1 class="pixel alert-text">The scheme unravels</h1><p class="body">Scores are about to be recalculated on what actually mattered. Watch the screen.</p>`);
+    return win('Trading halted', `<h1 class="pixel alert-text">Short-term gains, long-term consequences</h1><p class="body">The numbers caught up with ETI. Scores are about to be recalculated on what lasts. Watch the screen.</p>`);
   },
   board(snap) {
     const saved = validBoard(myAnswers(snap)[BOARD_ROUND]);

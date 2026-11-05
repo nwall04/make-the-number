@@ -19,10 +19,11 @@ export const METERS = [
 export const INTRO = {
   kicker: 'Chicago, 1985',
   title: 'You are Don Russell',
-  body: [
-    'CPA. Twelve years at Touche & Young, on track for partner. Evening MBA in information systems.',
-    'Cook & Spector, a $4 billion consumer products division of Queen’s Industries, offers you the corporate controller job: 250 people and “carte blanche.”',
-    'Your team will make Don’s real decisions. Four meters track the consequences.',
+  lede: 'Follow Don\u2019s career through two companies and make his five hardest calls. Four meters track the consequences.',
+  career: [
+    { when: '1973\u20131985', where: 'Touche & Young', role: 'Auditor', facts: ['CPA, on track for partner', 'Evening MBA in information systems'] },
+    { when: '1985\u20131989', where: 'Cook & Spector', role: 'Corporate controller', facts: ['$4B division of Queen\u2019s Industries', '250 staff and \u201Ccarte blanche\u201D'], rounds: 'Rounds 1\u20133' },
+    { when: '1989\u20131991', where: 'Eastern Technologies (ETI)', role: 'Chief financial officer', facts: ['Small, public satellite broadcaster', 'Growing fast on borrowed money'], rounds: 'Rounds 4\u20135' },
   ],
   rewarded: 'The company ranks you on reported earnings and your bonus. The simulation tracks all four meters.',
 };
@@ -30,6 +31,8 @@ export const INTRO = {
 export const ROUNDS = [
   {
     id: 'r1',
+    role: 'Corporate controller, Cook & Spector',
+    brief: 'Profit is $45M ahead of plan and you control how much of it gets reported.',
     company: 'Cook & Spector',
     year: '1985',
     title: 'The surplus',
@@ -47,10 +50,21 @@ export const ROUNDS = [
       text: 'Don built the reserves and spread them across 34 income statement lines in 600 product lines, in a way that would not attract the attention of Queen’s analysts or the auditors. No one asked significant questions.',
       quote: 'It’s better to be safe than sorry. If it turns out that we were overly conservative, it’s no big deal.',
     },
+    standard: {
+      verdict: 'Falls short',
+      expected: 'C',
+      points: [
+        'A reserve with no real basis misstates results. The CPA Code bars members from being associated with statements they know are misleading (Rule 205).',
+        'Hiding the reserves from the owner and the auditors fails the controller\u2019s fiduciary duty to report fairly.',
+        'Expected conduct: book only reserves you can support, document them and disclose them to Queen\u2019s.',
+      ],
+    },
     host: 'Ask: is a reserve you cannot support “conservative” or is it manipulation? Introduce earnings management: actions that make performance look better in the short run with no real economic benefit.',
   },
   {
     id: 'r2',
+    role: 'VP and controller, Cook & Spector',
+    brief: 'Results are below forecast and top management wants 8% earnings growth anyway.',
     company: 'Cook & Spector',
     year: '1986',
     title: 'The 8% request',
@@ -68,10 +82,21 @@ export const ROUNDS = [
       text: 'Don released the reserves. A year later he was promoted to Vice President and Controller, and after presenting one six-month plan he received a $30,000 bonus on the spot.',
       quote: 'One time the president called me the Monet of the accounting profession.',
     },
+    standard: {
+      verdict: 'Falls short',
+      expected: 'B',
+      points: [
+        'Releasing reserves to hit a target is earnings management: it makes performance look better with no real economic benefit.',
+        'Queen\u2019s, the owner, now makes decisions on smoothed numbers that hide a real decline.',
+        'Expected conduct: report the real result, or at minimum disclose the release to the owner.',
+      ],
+    },
     host: 'Ask: who is harmed here? Queen’s (the owner) is making decisions on numbers that are not real. Link to gamesmanship and why smoothed trends hide operating problems.',
   },
   {
     id: 'r3',
+    role: 'VP and controller, Cook & Spector',
+    brief: 'You discover the whole bonus system runs on a profit number managers can manipulate.',
     company: 'Cook & Spector',
     year: '1988',
     title: 'The bonus machine',
@@ -91,10 +116,21 @@ export const ROUNDS = [
       text: 'Don proposed a cash-flow and shareholder-value system. Top management was completely opposed: why change when the company was doing so well? Don got bored and left for ETI in 1989.',
       quote: 'We were getting our bonuses for nothing – actually worse than nothing because we were making bad decisions.',
     },
+    standard: {
+      verdict: 'Partly meets',
+      expected: 'D',
+      points: [
+        'Proposing better measures is exactly what a strong controller should do: act as the conscience of the organization and challenge management constructively.',
+        'But when top management refused, Don left without escalating to the owner. The problem stayed in place.',
+        'Expected conduct: take it to those charged with governance (Queen\u2019s) when management will not act.',
+      ],
+    },
     host: 'Ask: whose job is it to design bonuses that cannot be gamed? Introduce the compensation committee and congruent results measures.',
   },
   {
     id: 'r4',
+    role: 'Chief financial officer, ETI',
+    brief: 'ETI only shows a profit because of aggressive accounting, and your president refuses to fix it.',
     company: 'Eastern Technologies (ETI)',
     year: '1990',
     title: 'The year-end numbers',
@@ -114,10 +150,21 @@ export const ROUNDS = [
       text: 'Don signed and wrote a warning into the MD&A. The auditors gave an unqualified opinion while telling the board the statements were “pushing the edge on aggressive reporting.” The board was the chairman, the president, the previous CFO and a friend of the chairman.',
       quote: 'I had to leave the room because it was so outrageous.',
     },
+    standard: {
+      verdict: 'Falls short',
+      expected: 'C',
+      points: [
+        'A warning buried in the MD&A does not fix financial statements the CFO believes are misstated (Rule 205).',
+        'Don let the president\u2019s pressure override his professional judgment, which Rule 202 says a member must not allow.',
+        'Expected conduct: escalate to the board and the auditors in writing, and refuse to sign statements he believes are misleading.',
+      ],
+    },
     host: 'Ask: where was the board? Where were the auditors? Introduce board independence and competence, and auditor independence.',
   },
   {
     id: 'r5',
+    role: 'Chief financial officer, ETI',
+    brief: 'The loss is real, the report is due to the SEC, and fixing it will likely cost you your job.',
     company: 'Eastern Technologies (ETI)',
     year: 'February 1991',
     title: 'The decision',
@@ -137,19 +184,31 @@ export const ROUNDS = [
       text: 'Don forced ETI to report a $1 million loss, though he believed it should be $2 million or more. Two days later he was fired. He told Joe that without a check for a year’s salary he would go to the SEC. Joe wrote the check.',
       quote: 'You are going to report this number because I won’t go to jail.',
     },
+    standard: {
+      verdict: 'Partly meets',
+      expected: 'A',
+      points: [
+        'Forcing a correction took real courage, and it was the right direction.',
+        'But $1M was less than his own estimate of $2M or more, so the statements were still misleading.',
+        'Taking a year\u2019s salary in exchange for not going to the SEC put personal gain ahead of the public interest (Rules 201 and 202).',
+        'Expected conduct: book the full correction, escalate to the board and the auditors, resign if refused, and get advice on reporting. Never accept payment for silence.',
+      ],
+    },
     host: 'Ask: was $1M enough? Was taking a year’s salary for silence ethical? Bring in the CPA Code: integrity and due care (Rule 202) and never being associated with misleading statements (Rule 205).',
   },
 ];
 
 export const UNRAVEL = {
   kicker: 'What happened next',
+  title: 'Short-term gains, long-term consequences',
+  stat: { value: '\u221250%', label: 'ETI stock when the auditors resigned' },
   events: [
     { when: '1991–1993', text: 'ETI keeps reporting record earnings and the stock keeps rising.' },
     { when: '1994', text: 'The auditors resign after challenging items worth more than half of first-quarter profit. Management kept replacing rejected items with new ones.' },
     { when: '1994', text: 'The stock falls about 50%.' },
     { when: 'Later', text: 'The SEC charges the chairman with securities fraud and insider trading. The president and CFO are also indicted. First-quarter 1994 earnings had been inflated by 66%.' },
   ],
-  line: 'The scheme always unravels. Your score is now recalculated on what actually mattered: information quality and legal exposure.',
+  line: 'The short-term numbers caught up with ETI. Your score is now recalculated on what lasts: information quality and legal exposure.',
 };
 
 export const BOARD = {

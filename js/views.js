@@ -1,6 +1,6 @@
 // Projector views. Each returns an HTML string for one step.
 import {
-  STEPS, ROUNDS, METERS, INTRO, UNRAVEL, BOARD, BOARD_ROUND, BOARD_BUDGET, CLOSING_QUOTE, MAX, TAKEAWAYS,
+  STEPS, ROUNDS, METERS, INTRO, UNRAVEL, BOARD, BOARD_ROUND, BOARD_BUDGET, CLOSING_QUOTE, MAX, TAKEAWAYS, SLIDES,
   standings, tally, boardCatches, validBoard,
 } from './content.js';
 import { remaining, fmt } from './controls.js';
@@ -30,6 +30,7 @@ function roundTag(r) {
 }
 
 function answeredStrip(snap, round) {
+  if (snap.deck) return '';
   const chips = snap.teams.map((t) => {
     const done = snap.answers[t.id] && snap.answers[t.id][round] !== undefined;
     return `<span class="chip ${done ? 'done' : ''}">${esc(t.name)}</span>`;
@@ -39,12 +40,42 @@ function answeredStrip(snap, round) {
 }
 
 function timer(state) {
+  if (state.deck) return '';
   const r = remaining(state);
   if (r === null) return '';
   return `<div class="timer ${r <= 10 ? 'low' : ''} ${r === 0 ? 'out' : ''}" data-timer>${r === 0 ? 'Time' : fmt(r)}</div>`;
 }
 
+function slideItem(it) {
+  if (typeof it === 'string') return `<li>${esc(it)}</li>`;
+  return `<li class="tl"><b>${esc(it.when)}</b><span>${esc(it.text)}</span></li>`;
+}
+
+export function renderSlide(id) {
+  const S = SLIDES[id]; if (!S) return '';
+  const cols = S.cols ? `<div class="slide-grid n${S.cols.length}">${S.cols.map((c) => `
+      <div class="scol ${c.tone || 'plain'}"><h3>${esc(c.h)}</h3><ul>${c.items.map(slideItem).join('')}</ul></div>`).join('')}</div>` : '';
+  const cards = S.cards ? `<ol class="scards">${S.cards.map((c) => `
+      <li class="scard ${c.mark || ''}"><span class="sn">${c.n}</span><div><b>${esc(c.h)}</b><p>${esc(c.p)}</p></div><span class="smark" aria-label="${c.mark === 'ok' ? 'strong' : 'questioned'}">${c.mark === 'ok' ? '✓' : '?'}</span></li>`).join('')}</ol>
+      <p class="skey"><span class="smark ok">✓</span> strong in the case &nbsp; <span class="smark warn">?</span> questioned by the teaching note</p>` : '';
+  const hasTl = (S.cols || []).some((c) => c.items.some((it) => typeof it !== 'string'));
+  return `
+    <section class="slide ${hasTl ? 'has-tl' : ''} ${S.line ? 'has-line' : ''}">
+      <p class="kicker">${esc(S.kicker)}</p>
+      <h1 class="big">${esc(S.title)}</h1>
+      ${S.lede ? `<p class="lede-sm">${esc(S.lede)}</p>` : ''}
+      ${cols}${cards}
+      ${S.line ? `<p class="sline">${esc(S.line)}</p>` : ''}
+      <p class="src">Chapter 13, Merchant &amp; Van der Stede; Don Russell case and teaching note.</p>
+    </section>`;
+}
+
 const V = {
+  slide(snap) {
+    const s = STEPS[snap.state.step ?? 0];
+    return renderSlide(s.slide);
+  },
+
   lobby(snap) {
     const url = playUrl(snap.code);
     const offline = snap.status === 'offline';
@@ -134,7 +165,7 @@ const V = {
       <div class="fx-wrap"><table class="fx">
         <thead><tr><th></th><th>Choice</th>${METERS.map((m) => `<th class="m-${m.key}">${esc(m.short)}</th>`).join('')}<th>Teams</th></tr></thead>
         <tbody>${R.choices.map((c) => `
-          <tr><td><span class="letter">${c.id}</span></td><td><b>${esc(c.label)}</b></td>${METERS.map((m) => `<td>${delta(c.effects[m.key])}</td>`).join('')}<td class="n">${t[c.id].length}</td></tr>`).join('')}
+          <tr><td><span class="letter">${c.id}</span></td><td><b>${esc(c.label)}</b><small class="why">${esc(c.why || '')}</small></td>${METERS.map((m) => `<td>${delta(c.effects[m.key])}</td>`).join('')}<td class="n">${t[c.id].length}</td></tr>`).join('')}
         </tbody></table></div>
       <p class="note">Legal exposure: a plus sign means more risk for you.</p>
     </section>`;
@@ -171,7 +202,7 @@ const V = {
     <section class="standings">
       <p class="kicker">After round ${r + 1}</p>
       <h1 class="big">What the company rewards</h1>
-      <p class="sub">Ranked on reported earnings plus your bonus, the way C&amp;S paid its managers. Information quality and legal risk are not counted here. <b>Yet.</b></p>
+      <p class="sub">Ranked on reported earnings plus your bonus, the way C&amp;S and ETI paid their managers. Information quality and legal risk are not counted here. <b>Yet.</b></p>
       ${board(rows, 'short')}
     </section>`;
   },
@@ -248,7 +279,7 @@ const V = {
     const decided = ROUNDS.map((R, i) => {
       const t = tally(snap.teams, snap.answers, i);
       const top = R.choices.slice().sort((a, b) => t[b.id].length - t[a.id].length)[0];
-      return { R, i, matchDon: Math.round((t[R.don.choice].length / n) * 100), top, topN: t[top.id].length };
+      return { R, i, matchDon: Math.round((t[R.don.choice].length / n) * 100), matchStd: Math.round((t[R.standard.expected].length / n) * 100), top, topN: t[top.id].length };
     });
     const fixCounts = BOARD.fixes.map((f) => ({ f, c: snap.teams.filter((tm) => validBoard(snap.answers[tm.id]?.[BOARD_ROUND]).includes(f.id)).length })).sort((a, b) => b.c - a.c);
     const podium = rows.slice(0, 3);
@@ -260,9 +291,9 @@ const V = {
         <div class="pod p${k + 1}"><span class="pod-rank">${k + 1}</span><b>${esc(podium[k].name)}</b><span class="pod-score">${podium[k].score}</span><small>Board ${podium[k].catches}/6</small></div>`).join('') || '<p class="muted">No teams played.</p>'}
       </div>
       <div class="sum-grid">
-        <div><h3>How the class decided</h3><table class="fx"><tbody>${decided.map((d) => `
-          <tr><td><b>R${d.i + 1} ${esc(d.R.title)}</b></td><td>${d.topN ? `Most picked: <span class="letter inline">${d.top.id}</span> ${esc(d.top.label)}` : '<span class="muted">No votes</span>'}</td><td class="n">${d.matchDon}%</td></tr>`).join('')}
-          </tbody></table><p class="note">Right column: share of teams that made the same choice as Don.</p></div>
+        <div><h3>How the class decided</h3><table class="fx decided"><thead><tr><th>Round</th><th>Most picked</th><th>Like Don</th><th>Expected</th></tr></thead><tbody>${decided.map((d) => `
+          <tr><td><b>R${d.i + 1} ${esc(d.R.title)}</b></td><td>${d.topN ? `<span class="letter inline">${d.top.id}</span> ${esc(d.top.label)}` : '<span class="muted">No votes</span>'}</td><td class="n">${d.matchDon}%</td><td class="n ok">${d.matchStd}%</td></tr>`).join('')}
+          </tbody></table><p class="note">Like Don: share of teams that made Don’s choice. Expected: share that chose the conduct the CPA Code expects.</p></div>
         <div><h3>Three takeaways</h3><ol class="takeaways">${TAKEAWAYS.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
           ${fixCounts[0] && fixCounts[0].c ? `<p class="note">Most popular governance fix: <b>${esc(fixCounts[0].f.label)}</b></p>` : ''}</div>
       </div>
@@ -292,6 +323,7 @@ function board(rows, mode, prevRank) {
 }
 
 const TITLES = {
+  slide: (s) => `Teaching note · ${SLIDES[STEPS[s.step]?.slide]?.kicker.split('·').pop().trim() || ''}`,
   lobby: () => 'Make the Number · Lobby',
   intro: () => 'Briefing',
   question: (s) => `Round ${s.round + 1} · Decision`,

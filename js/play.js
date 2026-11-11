@@ -1,5 +1,5 @@
 // Team phone. play.html?room=ABCD
-import { STEPS, ROUNDS, METERS, BOARD, BOARD_ROUND, BOARD_BUDGET, MAX, CASE_FILE, teamMeters, standings, validBoard } from './content.js';
+import { STEPS, ROUNDS, METERS, BOARD, BOARD_ROUND, BOARD_BUDGET, MAX, CASE_FILE, SLIDES, teamMeters, standings, validBoard } from './content.js';
 import { OnlineStore, client } from './store.js';
 import { isConfigured } from './config.js';
 import { remaining, fmt } from './controls.js';
@@ -109,9 +109,13 @@ const P = {
       <p class="kicker">Round ${r + 1}: ${esc(R.title)}</p>
       <h2 class="ptitle">${ch ? `You chose <span class="letter inline">${ch.id}</span> ${esc(ch.label)}` : 'Your team did not answer'}</h2>
       ${showFx && ch ? `<div class="pdeltas">${METERS.map((m) => { const v = ch.effects[m.key]; return `<span class="m-${m.key}">${esc(m.short)} <b class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${v > 0 ? '+' : ''}${v}</b></span>`; }).join('')}</div>` : '<p class="body">Watch the screen.</p>'}
-      ${snap.state.kind === 'don' ? `<p class="pverdict v-${R.standard.verdict === 'Partly meets' ? 'part' : 'bad'}">Don\u2019s choice: <b>${esc(R.standard.verdict)}</b> the expected standard. Closest to expected conduct: <b>${R.standard.expected}</b>.</p>` : ''}
+      ${snap.state.kind === 'don' ? `<p class="pverdict v-${R.standard.verdict === 'Partly meets' ? 'part' : 'bad'}">Don chose <b>${R.don.choice}</b>: <b>${esc(R.standard.verdict)}</b> the expected standard. Expected conduct: <b>${R.standard.expected}</b>.${cur ? ` <span class="pmatch">${cur === R.standard.expected ? 'Your team chose the expected conduct.' : cur === R.don.choice ? 'Your team chose what Don chose.' : 'Your team chose something else.'}</span>` : ''}</p>` : ''}
       ${showFx ? meters(teamMeters(myAnswers(snap), r)) : ''}
       ${snap.state.kind === 'standings' ? rankLine(snap, r, 'short') + '<p class="hint">This ranking counts earnings and bonus only. The simulation tracks all four meters.</p>' : ''}`);
+  },
+  slide(snap) {
+    const S = SLIDES[STEPS[snap.state.step ?? 0]?.slide] || {};
+    return win('Teaching note', `<p class="kicker">${esc(S.kicker || 'Chapter 13')}</p><h2 class="ptitle">${esc(S.title || '')}</h2><p class="body">${esc(S.phone || 'Watch the screen.')}</p><p class="muted">Full slide on the big screen. Case file is one tap away.</p>`);
   },
   unravel() {
     return win('Trading halted', `<h1 class="pixel alert-text">Short-term gains, long-term consequences</h1><p class="body">The numbers caught up with ETI. Scores are about to be recalculated on what lasts. Watch the screen.</p>`);

@@ -9,7 +9,18 @@ export function secondsFor(step) {
 
 export async function goTo(store, step) {
   const n = Math.max(0, Math.min(STEPS.length - 1, step));
-  await store.setState(stateForStep(n, secondsFor(n)));
+  const prev = store.snapshot().state || {};
+  const st = stateForStep(n, secondsFor(n));
+  // The class clock starts the first time the host leaves the lobby and survives Back/Jump.
+  if (prev.startedAt) st.startedAt = prev.startedAt;
+  else if (n > 0) st.startedAt = new Date().toISOString();
+  await store.setState(st);
+}
+
+// Seconds since the host left the lobby, or null before that.
+export function elapsed(state) {
+  if (!state?.startedAt) return null;
+  return Math.max(0, Math.floor((Date.now() - Date.parse(state.startedAt)) / 1000));
 }
 export const next = (store) => goTo(store, (store.snapshot().state.step ?? 0) + 1);
 export const back = (store) => goTo(store, (store.snapshot().state.step ?? 0) - 1);

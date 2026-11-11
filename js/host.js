@@ -1,8 +1,8 @@
 // Host panel (Noah's MacBook). Signs in, creates a room, and drives the projector.
-import { STEPS, ROUNDS, BOARD_ROUND } from './content.js';
+import { STEPS, BOARD_ROUND, PLANNED_MINUTES, CLASS_MINUTES, hostNote } from './content.js';
 import { OnlineStore, client, stateForStep } from './store.js';
 import { isConfigured, playUrl } from './config.js';
-import { next, back, addTime, lockNow, reopen, goTo, remaining, fmt } from './controls.js';
+import { next, back, addTime, lockNow, reopen, goTo, remaining, elapsed, fmt } from './controls.js';
 import { renderEntry, renderTeams, bindEntry, patch, entryRound } from './entry.js';
 import { esc } from './views.js';
 
@@ -33,6 +33,7 @@ function signInView(msg = '') {
   });
 }
 
+const planClock = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
 const randomCode = () => Array.from({ length: 4 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
 
 async function roomsView() {
@@ -68,6 +69,7 @@ async function openRoom(code) {
     <div class="console-main">
       ${win(`Room ${code} · Control`, `
         <div class="now"><span class="kicker">Now</span><b id="nowLabel"></b><span id="nowTimer" class="ptimer"></span></div>
+        <div class="clock-row"><span id="classClock" class="class-clock"></span><span class="muted">Plan: ${PLANNED_MINUTES} min of ${CLASS_MINUTES}. The clock starts when you leave the lobby.</span></div>
         <div class="ctrl-row big-ctrls">
           <button class="btn" data-act="back">◀ Back</button>
           <button class="btn primary" data-act="next">Next ▶</button>
@@ -84,8 +86,9 @@ async function openRoom(code) {
       ${win('Links', `
         <label class="field">Projector (open on the class computer)<input readonly value="${esc(screenUrl)}" onclick="this.select()"></label>
         <label class="field">Phones<input readonly value="${esc(playUrl(code))}" onclick="this.select()"></label>
-        <p><a class="btn" href="${esc(screenUrl)}" target="_blank" rel="noopener">Open projector view</a> <a class="btn" href="${esc(playUrl(code))}" target="_blank" rel="noopener">Open a test phone</a></p>`)}
-      ${win('Run of show', `<ol class="steps" id="steps">${STEPS.map((s, i) => `<li><button class="link" data-jump="${i}">${esc(s.label)}</button></li>`).join('')}</ol>`)}
+        <p><a class="btn" href="${esc(screenUrl)}" target="_blank" rel="noopener">Open projector view</a> <a class="btn" href="${esc(playUrl(code))}" target="_blank" rel="noopener">Open a test phone</a></p>
+        <p class="muted"><a href="slides.html" target="_blank" rel="noopener">Printable deck</a> of every slide and round, for submitting before class.</p>`)}
+      ${win('Run of show', `<ol class="steps" id="steps">${STEPS.map((s, i) => `<li class="k-${s.kind}"><span class="plan">${planClock(s.planAt)}</span><button class="link" data-jump="${i}">${esc(s.label)}</button><span class="mins">${s.minutes} min</span></li>`).join('')}</ol>`)}
       ${win('Teams', `<form id="addTeam" class="ctrl-row"><input id="teamName" maxlength="24" placeholder="Add a team by hand"><button class="btn" type="submit">Add</button></form><div id="teams"></div>
         <p><button class="link danger" id="clear">Clear all answers</button> · <button class="link" id="leaveRoom">Back to rooms</button></p>`)}
     </div>
@@ -122,9 +125,9 @@ function render(snap) {
   app.querySelector('#nowLabel').textContent = `${i + 1}/${STEPS.length} · ${s.label}`;
   app.querySelector('#nextLabel').textContent = STEPS[i + 1] ? `Next: ${STEPS[i + 1].label}` : 'This is the last step.';
   app.querySelectorAll('#steps li').forEach((li, k) => li.classList.toggle('current', k === i));
-  const r = s.round;
-  const note = r !== undefined && r !== null && ROUNDS[r] ? ROUNDS[r].host : s.kind === 'board' ? 'Give teams time to argue about trade-offs. Ask one team why they skipped the audit committee.' : '';
+  const note = hostNote(i);
   patch(app.querySelector('#notes'), note ? `<p><b>Host note:</b> ${esc(note)}</p>` : '');
+  app.querySelector('#steps li.current')?.scrollIntoView({ block: 'nearest' });
   const er = entryRound(snap);
   const n = er === null ? 0 : snap.teams.filter((t) => snap.answers[t.id]?.[er] !== undefined).length;
   app.querySelector('#answeredCount').textContent = er === null ? '' : `${n} of ${snap.teams.length} teams answered${er === BOARD_ROUND ? ' the board round' : ` round ${er + 1}`}. Tap a letter to set or clear a team’s answer.`;
@@ -134,8 +137,16 @@ function render(snap) {
 
 setInterval(() => {
   const el = app.querySelector('#nowTimer'); if (!el || !store) return;
-  const r = remaining(store.snapshot().state);
+  const st = store.snapshot().state;
+  const r = remaining(st);
   el.textContent = r === null ? '' : r === 0 ? 'Locked' : fmt(r);
+  const ck = app.querySelector('#classClock'); if (!ck) return;
+  const e = elapsed(st);
+  if (e === null) { ck.textContent = 'Class clock 0:00'; ck.className = 'class-clock'; return; }
+  const plan = (STEPS[st.step ?? 0]?.planAt ?? 0) * 60;
+  const diff = e - plan;
+  ck.textContent = `Class clock ${fmt(e)} · plan ${fmt(Math.round(plan))} · ${diff > 0 ? `${fmt(diff)} behind` : `${fmt(-diff)} ahead`}`;
+  ck.className = `class-clock ${diff > 180 ? 'behind' : ''}`;
 }, 250);
 
 document.addEventListener('keydown', (e) => {

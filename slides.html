@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Make the Number · Deck</title>
+<meta name="description" content="Printable deck: every teaching slide and round of the Make the Number class on Don Russell (ADM 4345, Chapter 13).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="deck screen-like">
+  <main class="deck-wrap">
+    <div class="deck-top">
+      <h1>Make the Number · Deck</h1>
+      <span class="muted">Every teaching slide and decision round, in class order. Use your browser’s Print (landscape) to save a PDF for submission.</span>
+      <button class="btn primary" onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <div id="deck"></div>
+  </main>
+  <script type="module">
+    import { STEPS, ROUNDS, TAKEAWAYS, PLANNED_MINUTES, CLASS_MINUTES, CASE_FILE } from './js/content.js';
+    import { renderScreen, esc } from './js/views.js';
+
+    const planClock = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
+    const card = (title, body, cls = '') => `<div class="win deck-slide ${cls}"><div class="titlebar"><span class="tb-title">${esc(title)}</span></div><div class="win-body">${body}</div></div>`;
+    const out = [];
+
+    out.push(card('ADM 4345 · Student-led class', `
+      <div class="deck-cover">
+        <div>
+          <p class="kicker">Chapter 13 · Corporate governance and boards of directors</p>
+          <h1 class="mega">Make the<br>Number</h1>
+          <p>A live simulation of <i>Don Russell: Experiences of a Controller/CFO</i> (Merchant)</p>
+          <p class="muted">Teams play on their own devices at <b>nwall04.github.io/make-the-number</b>. This deck is the same material in print.</p>
+        </div>
+      </div>`));
+
+    out.push(card('Run of show', `
+      <p class="kicker">${PLANNED_MINUTES} minutes planned of ${CLASS_MINUTES}</p>
+      <h1 class="big">How the 75 minutes run</h1>
+      <ol class="agenda">${STEPS.filter((s) => !['tally', 'effects', 'standings', 'boardfail'].includes(s.kind)).map((s) => `<li class="${s.kind === 'slide' ? 'slide-row' : ''}"><b>${planClock(s.planAt)}</b><span>${esc(s.label.replace(/^Slide: /, 'Slide · '))}</span></li>`).join('')}</ol>
+      <p class="note">Each decision round is a 90-second vote, the room’s tally, the consequences on four meters, what Don actually did measured against the CPA Ontario Code, and the standings. The board round is 150 seconds.</p>`));
+
+    const keep = new Set(['slide', 'intro', 'question', 'don', 'unravel', 'board', 'quote']);
+    STEPS.forEach((s, i) => {
+      if (!keep.has(s.kind)) return;
+      const snap = { code: 'DECK', state: { step: i, kind: s.kind, round: s.round ?? null, deadline: null, deck: true }, teams: [], answers: {}, status: 'offline', exists: true, deck: true };
+      out.push(renderScreen(snap).replace('class="win main', `class="win deck-slide ${s.kind === 'don' ? 'deck-don' : ''}`));
+    });
+
+    out.push(card('End of class', `
+      <p class="kicker">Three takeaways</p>
+      <h1 class="big">What to remember</h1>
+      <ol class="takeaways" style="font-size:1.15em">${TAKEAWAYS.map((t) => `<li>${esc(t)}</li>`).join('')}</ol>
+      <p class="note">Sources: Merchant &amp; Van der Stede, <i>Management Control Systems</i>, Chapter 13 and the Don Russell case, (A) case and teaching note; CPA Ontario Code of Professional Conduct, Rules 201, 202 and 205.</p>`));
+
+    out.push(card('Appendix · Case file', `
+      <p class="kicker">The reference sheet every team can open during the game</p>
+      <div class="slide-grid n3">${CASE_FILE.slice(0, 3).map((sec) => `<div class="scol plain"><h3>${esc(sec.title)}</h3><ul style="font-size:.78em">${sec.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></div>`).join('')}</div>`));
+
+    const deck = document.getElementById('deck');
+    deck.innerHTML = out.join('');
+    [...deck.querySelectorAll('.deck-slide')].forEach((el, i) => el.insertAdjacentHTML('beforeend', `<span class="deck-no">${i + 1} / ${deck.children.length}</span>`));
+  </script>
+</body>
+</html>
